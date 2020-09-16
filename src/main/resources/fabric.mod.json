@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "slotlock",
+  "version": "${version}",
+  "name": "SlotLock",
+  "description": "Lock! Don't drop!",
+  "authors": [
+    "D4rkness_King"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/slotlock",
+    "sources": "https://github.com/lucaargolo/slotlock",
+    "issues": "https://github.com/lucaargolo/slotlock/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/slotlock/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "io.github.lucaargolo.slotlock.Slotlock"
+    ]
+  },
+  "accessWidener": "slotlock.accesswidener",
+  "mixins": [
+    "slotlock.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.8.0",
+    "fabric": "*",
+    "minecraft": "1.16.*"
+  }
+}
