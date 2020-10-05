@@ -13,6 +13,7 @@
     "MinecraftClientMixin",
     "ScreenHandlerMixin",
     "ServerWorldAccessor",
+    "KeyBindingAccessor",
     "SlotAccessor",
     "SlotMixin"
   ],

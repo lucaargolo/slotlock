@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.github.lucaargolo.slotlock.mixin.CreativeSlotAccessor;
+import io.github.lucaargolo.slotlock.mixin.KeyBindingAccessor;
 import io.github.lucaargolo.slotlock.mixin.ServerWorldAccessor;
 import io.github.lucaargolo.slotlock.mixin.SlotAccessor;
 import net.fabricmc.api.ClientModInitializer;
@@ -11,7 +12,9 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ServerInfo;
+import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerInventory;
@@ -215,6 +218,19 @@ public class Slotlock implements ClientModInitializer {
         if(Slotlock.isLocked(selectedSlot)) {
             info.setReturnValue(false);
         }
+    }
+
+    public static void handleInputEvents(GameOptions options, ClientPlayerEntity player) {
+        boolean toPress = false;
+        while(options.keySwapHands.wasPressed()) {
+            if (!player.isSpectator()) {
+                int selectedSlot = player.inventory.selectedSlot;
+                if(!Slotlock.isLocked(selectedSlot)) {
+                    toPress = true;
+                }
+            }
+        }
+        if(toPress) KeyBinding.onKeyPressed(((KeyBindingAccessor) options.keySwapHands).getBoundKey());
     }
 
 
