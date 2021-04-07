@@ -155,6 +155,7 @@ public class Slotlock implements ClientModInitializer {
     }
 
     public static void handleMouseClick(ScreenHandler handler, PlayerInventory playerInventory,  Slot slot, int invSlot, int clickData, SlotActionType actionType, CallbackInfo info) {
+        if(!MinecraftClient.getInstance().isOnThread()) return;
         if(slot != null && slot.inventory == playerInventory && Slotlock.isLocked(((SlotAccessor) slot).getIndex())) {
             info.cancel();
         }
@@ -180,6 +181,7 @@ public class Slotlock implements ClientModInitializer {
     }
 
     public static void handleKeyPressed(Slot focusedSlot, PlayerInventory playerInventory, int keyCode, int scanCode, CallbackInfoReturnable<Boolean> info) {
+        if(!MinecraftClient.getInstance().isOnThread()) return;
         if(keyCode != 256 && !MinecraftClient.getInstance().options.keyInventory.matchesKey(keyCode, scanCode)) {
             Slot finalSlot = focusedSlot;
             if(finalSlot instanceof CreativeInventoryScreen.CreativeSlot) {
@@ -204,6 +206,7 @@ public class Slotlock implements ClientModInitializer {
     }
 
     public static void handleHotbarKeyPressed(Slot focusedSlot, PlayerInventory playerInventory, CallbackInfoReturnable<Boolean> info) {
+        if(!MinecraftClient.getInstance().isOnThread()) return;
         Slot finalSlot = focusedSlot;
         if(finalSlot instanceof CreativeInventoryScreen.CreativeSlot) {
             finalSlot = ((CreativeSlotAccessor) finalSlot).getSlot();
@@ -214,6 +217,7 @@ public class Slotlock implements ClientModInitializer {
     }
 
     public static void handleDropSelectedItem(PlayerInventory playerInventory, CallbackInfoReturnable<Boolean> info) {
+        if(!MinecraftClient.getInstance().isOnThread()) return;
         int selectedSlot = playerInventory.selectedSlot;
         if(Slotlock.isLocked(selectedSlot)) {
             info.setReturnValue(false);
@@ -221,6 +225,7 @@ public class Slotlock implements ClientModInitializer {
     }
 
     public static void handleInputEvents(GameOptions options, ClientPlayerEntity player) {
+        if(!MinecraftClient.getInstance().isOnThread()) return;
         boolean toPress = false;
         while(options.keySwapHands.wasPressed()) {
             if (!player.isSpectator()) {
@@ -232,8 +237,5 @@ public class Slotlock implements ClientModInitializer {
         }
         if(toPress) KeyBinding.onKeyPressed(((KeyBindingAccessor) options.keySwapHands).getBoundKey());
     }
-
-
-
 
 }
