@@ -18,6 +18,7 @@ import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -154,11 +155,22 @@ public class Slotlock implements ClientModInitializer {
 
     }
 
-    public static void handleMouseClick(ScreenHandler handler, PlayerInventory playerInventory,  Slot slot, int invSlot, int clickData, SlotActionType actionType, CallbackInfo info) {
+    public static void handleMouseClick(ScreenHandler handler, PlayerInventory playerInventory, Slot slot, int invSlot, int clickData, SlotActionType actionType, CallbackInfo info) {
         if(!MinecraftClient.getInstance().isOnThread()) return;
         if(slot != null && slot.inventory == playerInventory && Slotlock.isLocked(((SlotAccessor) slot).getIndex())) {
             info.cancel();
         }
+
+        if(slot != null && actionType == SlotActionType.PICKUP_ALL) {
+            ItemStack pickedStack = playerInventory.getCursorStack();
+            handler.slots.forEach(handlerSlot -> {
+                int slotIndex = ((SlotAccessor) handlerSlot).getIndex();
+                if(handlerSlot.inventory == playerInventory && Slotlock.isLocked(slotIndex) && canMergeItems(pickedStack, handlerSlot.getStack())) {
+                    info.cancel();
+                }
+            });
+        }
+
         if(actionType == SlotActionType.QUICK_MOVE && invSlot >= 0 && invSlot < handler.slots.size()) {
             Slot slot2 = handler.slots.get(invSlot);
             if(slot2.inventory == playerInventory && Slotlock.isLocked(((SlotAccessor) slot2).getIndex())) {
@@ -189,16 +201,18 @@ public class Slotlock implements ClientModInitializer {
             }
             if(finalSlot != null) {
                 int index = ((SlotAccessor) finalSlot).getIndex();
-                if (Slotlock.lockBinding.matchesKey(keyCode, scanCode) && finalSlot.inventory == playerInventory) {
-                    boolean locked = Slotlock.isLocked(index);
-                    if (locked) {
-                        Slotlock.unlockSlot(index);
-                    } else if (!finalSlot.getStack().isEmpty()) {
-                        Slotlock.lockSlot(index);
-                    }
-                } else {
-                    if (Slotlock.isLocked(index)) {
-                        info.setReturnValue(true);
+                if(finalSlot.inventory == playerInventory) {
+                    if (Slotlock.lockBinding.matchesKey(keyCode, scanCode)) {
+                        boolean locked = Slotlock.isLocked(index);
+                        if (locked) {
+                            Slotlock.unlockSlot(index);
+                        } else if (!finalSlot.getStack().isEmpty()) {
+                            Slotlock.lockSlot(index);
+                        }
+                    } else {
+                        if (Slotlock.isLocked(index)) {
+                            info.setReturnValue(true);
+                        }
                     }
                 }
             }
@@ -236,6 +250,18 @@ public class Slotlock implements ClientModInitializer {
             }
         }
         if(toPress) KeyBinding.onKeyPressed(((KeyBindingAccessor) options.keySwapHands).getBoundKey());
+    }
+
+    private static boolean canMergeItems(ItemStack first, ItemStack second) {
+        if (first.getItem() != second.getItem()) {
+            return false;
+        } else if (first.getDamage() != second.getDamage()) {
+            return false;
+        } else if (first.getCount() > first.getMaxCount()) {
+            return false;
+        } else {
+            return ItemStack.areTagsEqual(first, second);
+        }
     }
 
 }
