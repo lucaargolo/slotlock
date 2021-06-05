@@ -127,31 +127,34 @@ public class Slotlock implements ClientModInitializer {
                 Files.write(slotLockPath, "{ }".getBytes(StandardCharsets.UTF_8));
                 Slotlock.LOGGER.info("Successfully created new slotlock file");
             }catch (Exception e){
-                Slotlock.LOGGER.error("Failed to create slotlock file");
-                Slotlock.LOGGER.error(e.getStackTrace());
+                Slotlock.LOGGER.error("An error occurred while creating the slotlock file.", e);
             }
         }
         String json;
         try {
             json = new String(Files.readAllBytes(slotLockPath), StandardCharsets.UTF_8);
         }catch (Exception e) {
-            Slotlock.LOGGER.error("Failed to load slotlock file");
-            Slotlock.LOGGER.error(e.getStackTrace());
+            Slotlock.LOGGER.error("An error occurred while loading the slotlock file.", e);
             json = "{ }";
         }
-        JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
-        JsonArray lockedSlotsJson = jsonObject.getAsJsonArray(key);
-        if(lockedSlotsJson != null) {
-            lockedSlotsJson.forEach(element -> {
-                int slot = -1;
-                try {
-                    slot = element.getAsInt();
-                }catch (Exception ignored) {}
-                if(slot != -1)
-                    Slotlock.lockedSlots.add(slot);
-            });
+        try {
+            JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
+            JsonArray lockedSlotsJson = jsonObject.getAsJsonArray(key);
+            if (lockedSlotsJson != null) {
+                lockedSlotsJson.forEach(element -> {
+                    int slot = -1;
+                    try {
+                        slot = element.getAsInt();
+                    } catch (Exception ignored) {
+                    }
+                    if (slot != -1)
+                        Slotlock.lockedSlots.add(slot);
+                });
+            }
+            Slotlock.LOGGER.info("Successfully loaded slotlock file");
+        }catch (Exception e) {
+            Slotlock.LOGGER.error("An error occurred while reading the slotlock file.", e);
         }
-        Slotlock.LOGGER.info("Successfully loaded slotlock file");
 
     }
 
