@@ -89,6 +89,10 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             finalSlot = ((CreativeSlotAccessor) finalSlot).getSlot();
         }
         if(this.client != null && slot.inventory == slotlock$playerInventory && Slotlock.isLocked(((SlotAccessor) finalSlot).getIndex())) {
+            if (!finalSlot.hasStack()) {
+                Slotlock.unlockSlot(((SlotAccessor) finalSlot).getIndex());
+                return;
+            }
             RenderSystem.setShaderTexture(0, SLOT_LOCK_TEXTURE);
             this.drawTexture(matrices, slot.x, slot.y, 0, 0, 16, 16);
         }
