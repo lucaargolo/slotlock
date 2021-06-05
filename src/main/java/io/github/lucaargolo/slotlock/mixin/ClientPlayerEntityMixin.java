@@ -8,10 +8,7 @@ import net.minecraft.client.world.ClientWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Iterator;
 
 @Mixin(ClientPlayerEntity.class)
 public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity {
@@ -22,7 +19,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
     @Inject(at = @At("HEAD"), method = "dropSelectedItem", cancellable = true)
     public void dropSelectedItem(boolean dropEntireStack, CallbackInfoReturnable<Boolean> info){
-        Slotlock.handleDropSelectedItem(this.inventory, info);
+        Slotlock.handleDropSelectedItem(this.getInventory(), info);
     }
 
 //    @Inject(at = @At("HEAD"), method = "tick")

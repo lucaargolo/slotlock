@@ -1,6 +1,7 @@
 package io.github.lucaargolo.slotlock.mixin;
 
 import io.github.lucaargolo.slotlock.Slotlock;
+import io.github.lucaargolo.slotlock.mixed.HandledScreenMixed;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.entity.player.PlayerInventory;
@@ -21,7 +22,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
     @Inject(at = @At("HEAD"), method = "onMouseClick", cancellable = true)
     public void onMouseClick(Slot slot, int invSlot, int clickData, SlotActionType actionType, CallbackInfo info) {
-        Slotlock.handleMouseClick(handler, playerInventory, slot, invSlot, clickData, actionType, info);
+        Slotlock.handleMouseClick(handler, ((HandledScreenMixed) this).slotlock$getPlayerInventory(), slot, invSlot, clickData, actionType, info);
     }
 
 }

@@ -14,8 +14,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.options.GameOptions;
-import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.option.GameOptions;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -30,7 +30,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -63,14 +62,14 @@ public class Slotlock implements ClientModInitializer {
                     Path slotLockPath = Paths.get(slotLockFile.getAbsolutePath());
                     String json = "{ }";
                     try {
-                        json = new String(Files.readAllBytes(slotLockPath), StandardCharsets.UTF_8);
+                        json = Files.readString(slotLockPath);
                     }catch (Exception ignored) { }
                     JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
                     JsonArray jsonArray = new JsonArray();
                     lockedSlots.forEach(jsonArray::add);
                     jsonObject.add(currentKey, jsonArray);
                     try {
-                        Files.write(slotLockPath, jsonObject.toString().getBytes(StandardCharsets.UTF_8));
+                        Files.writeString(slotLockPath, jsonObject.toString());
                         Slotlock.LOGGER.info("Successfully updated slotlock file");
                     }catch (Exception e) {
                         Slotlock.LOGGER.error("Failed to update slotlock file");
@@ -124,7 +123,7 @@ public class Slotlock implements ClientModInitializer {
         if(Files.notExists(slotLockPath)) {
             try{
                 Slotlock.LOGGER.info("File not found! Creating new slotlock file");
-                Files.write(slotLockPath, "{ }".getBytes(StandardCharsets.UTF_8));
+                Files.writeString(slotLockPath, "{ }");
                 Slotlock.LOGGER.info("Successfully created new slotlock file");
             }catch (Exception e){
                 Slotlock.LOGGER.error("An error occurred while creating the slotlock file.", e);
@@ -132,7 +131,7 @@ public class Slotlock implements ClientModInitializer {
         }
         String json;
         try {
-            json = new String(Files.readAllBytes(slotLockPath), StandardCharsets.UTF_8);
+            json = Files.readString(slotLockPath);
         }catch (Exception e) {
             Slotlock.LOGGER.error("An error occurred while loading the slotlock file.", e);
             json = "{ }";
@@ -165,7 +164,7 @@ public class Slotlock implements ClientModInitializer {
         }
 
         if(slot != null && actionType == SlotActionType.PICKUP_ALL) {
-            ItemStack pickedStack = playerInventory.getCursorStack();
+            ItemStack pickedStack = handler.getCursorStack();
             handler.slots.forEach(handlerSlot -> {
                 int slotIndex = ((SlotAccessor) handlerSlot).getIndex();
                 if(handlerSlot.inventory == playerInventory && Slotlock.isLocked(slotIndex) && canMergeItems(pickedStack, handlerSlot.getStack())) {
@@ -246,7 +245,7 @@ public class Slotlock implements ClientModInitializer {
         boolean toPress = false;
         while(options.keySwapHands.wasPressed()) {
             if (!player.isSpectator()) {
-                int selectedSlot = player.inventory.selectedSlot;
+                int selectedSlot = player.getInventory().selectedSlot;
                 if(!Slotlock.isLocked(selectedSlot)) {
                     toPress = true;
                 }

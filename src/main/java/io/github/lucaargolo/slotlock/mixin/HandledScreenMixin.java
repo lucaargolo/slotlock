@@ -1,6 +1,8 @@
 package io.github.lucaargolo.slotlock.mixin;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.lucaargolo.slotlock.Slotlock;
+import io.github.lucaargolo.slotlock.mixed.HandledScreenMixed;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -21,40 +23,50 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
 import java.util.List;
 
 @Mixin(HandledScreen.class)
-public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen {
+public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen implements HandledScreenMixed {
 
     protected HandledScreenMixin(Text title) {
         super(title);
     }
 
     private static final Identifier SLOT_LOCK_TEXTURE = new Identifier(Slotlock.MOD_ID, "textures/gui/lock_overlay.png");
-    @Shadow @Final protected PlayerInventory playerInventory;
     @Shadow @Nullable protected Slot focusedSlot;
-
     @Shadow @Final protected T handler;
 
-    @Inject(at = @At("HEAD"), method = "onMouseClick", cancellable = true)
+    private PlayerInventory slotlock$playerInventory;
+
+    @Override
+    public PlayerInventory slotlock$getPlayerInventory() {
+        return slotlock$playerInventory;
+    }
+
+    @Inject(at = @At("TAIL"), method = "<init>")
+    public void onInit(T handler, PlayerInventory inventory, Text title, CallbackInfo ci) {
+        slotlock$playerInventory = inventory;
+    }
+
+    @Inject(at = @At("HEAD"), method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", cancellable = true)
     public void onMouseClick(Slot slot, int invSlot, int clickData, SlotActionType actionType, CallbackInfo info) {
-        Slotlock.handleMouseClick(handler, playerInventory, slot, invSlot, clickData, actionType, info);
+        Slotlock.handleMouseClick(handler, slotlock$playerInventory, slot, invSlot, clickData, actionType, info);
     }
 
     @Inject(at = @At("HEAD"), method = "keyPressed", cancellable = true)
     public void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> info) {
-        Slotlock.handleKeyPressed(focusedSlot, playerInventory, keyCode, scanCode, info);
+        Slotlock.handleKeyPressed(focusedSlot, slotlock$playerInventory, keyCode, scanCode, info);
     }
 
     @Inject(at = @At("HEAD"), method = "handleHotbarKeyPressed", cancellable = true)
     public void handleHotbarKeyPressed(int keyCode, int scanCode, CallbackInfoReturnable<Boolean> info) {
-        Slotlock.handleHotbarKeyPressed(focusedSlot, playerInventory, info);
+        Slotlock.handleHotbarKeyPressed(focusedSlot, slotlock$playerInventory, info);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Inject(at = @At("HEAD"), method = "drawMouseoverTooltip", cancellable = true)
     public void drawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
-        if (this.client.player.inventory.getCursorStack().isEmpty() && this.focusedSlot != null && this.focusedSlot.inventory == this.playerInventory) {
+        if (handler.getCursorStack().isEmpty() && this.focusedSlot != null && this.focusedSlot.inventory == this.slotlock$playerInventory) {
             Slot finalSlot = focusedSlot;
             if(finalSlot instanceof CreativeInventoryScreen.CreativeSlot) {
                 finalSlot = ((CreativeSlotAccessor) finalSlot).getSlot();
@@ -76,8 +88,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         if(finalSlot instanceof CreativeInventoryScreen.CreativeSlot) {
             finalSlot = ((CreativeSlotAccessor) finalSlot).getSlot();
         }
-        if(this.client != null && slot.inventory == playerInventory && Slotlock.isLocked(((SlotAccessor) finalSlot).getIndex())) {
-            this.client.getTextureManager().bindTexture(SLOT_LOCK_TEXTURE);
+        if(this.client != null && slot.inventory == slotlock$playerInventory && Slotlock.isLocked(((SlotAccessor) finalSlot).getIndex())) {
+            RenderSystem.setShaderTexture(0, SLOT_LOCK_TEXTURE);
             this.drawTexture(matrices, slot.x, slot.y, 0, 0, 16, 16);
         }
     }
