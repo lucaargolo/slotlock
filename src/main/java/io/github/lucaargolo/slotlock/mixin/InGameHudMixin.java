@@ -28,9 +28,14 @@ public class InGameHudMixin extends DrawableHelper {
 
     @Inject(at = @At("HEAD"), method = "renderHotbarItem")
     public void renderHotbarItem(int x, int y, float tickDelta, PlayerEntity player, ItemStack stack, int seed, CallbackInfo ci) {
-        if(Slotlock.isLocked(slotIndex)) {
-            RenderSystem.setShaderTexture(0, SLOT_LOCK_TEXTURE);
-            this.drawTexture(matrices, x, y, 0, 0, 16, 16);
+        if (Slotlock.isLocked(slotIndex)) {
+            if (player.getInventory().getStack(slotIndex).isEmpty()) {
+                Slotlock.unlockSlot(slotIndex);
+            }
+            else {
+                RenderSystem.setShaderTexture(0, SLOT_LOCK_TEXTURE);
+                this.drawTexture(matrices, x, y, 0, 0, 16, 16);
+            }
         }
         slotIndex++;
     }

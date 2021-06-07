@@ -51,7 +51,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     @Inject(at = @At("HEAD"), method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", cancellable = true)
     public void onMouseClick(Slot slot, int invSlot, int clickData, SlotActionType actionType, CallbackInfo info) {
-        Slotlock.handleMouseClick(handler, slotlock$playerInventory, slot, invSlot, clickData, actionType, info);
+        Slotlock.handleMouseClick(handler, slotlock$playerInventory, slot, null, invSlot, clickData, actionType, info);
     }
 
     @Inject(at = @At("HEAD"), method = "keyPressed", cancellable = true)
@@ -89,6 +89,10 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             finalSlot = ((CreativeSlotAccessor) finalSlot).getSlot();
         }
         if(this.client != null && slot.inventory == slotlock$playerInventory && Slotlock.isLocked(((SlotAccessor) finalSlot).getIndex())) {
+            if (!finalSlot.hasStack()) {
+                Slotlock.unlockSlot(((SlotAccessor) finalSlot).getIndex());
+                return;
+            }
             RenderSystem.setShaderTexture(0, SLOT_LOCK_TEXTURE);
             this.drawTexture(matrices, slot.x, slot.y, 0, 0, 16, 16);
         }
