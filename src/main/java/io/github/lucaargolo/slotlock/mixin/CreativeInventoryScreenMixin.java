@@ -25,18 +25,7 @@ public abstract class CreativeInventoryScreenMixin extends AbstractInventoryScre
 
     @Inject(at = @At("HEAD"), method = "onMouseClick", cancellable = true)
     public void onMouseClick(Slot slot, int invSlot, int clickData, SlotActionType actionType, CallbackInfo info) {
-
-        PlayerInventory playerInventory = this.client.player.getInventory();
-
-        if (slot == this.deleteItemSlot && actionType == SlotActionType.QUICK_MOVE) {
-            for (int i = 0; i < playerInventory.size(); ++i) {
-                if (!Slotlock.isLocked(i)) {
-                    playerInventory.removeStack(i);
-                }
-            }
-            info.cancel();
-        }
-        Slotlock.handleMouseClick(handler, ((HandledScreenMixed) this).slotlock$getPlayerInventory(), slot, invSlot, clickData, actionType, info);
+        Slotlock.handleMouseClick(handler, ((HandledScreenMixed) this).slotlock$getPlayerInventory(), slot, deleteItemSlot, invSlot, clickData, actionType, info);
     }
 
 }
