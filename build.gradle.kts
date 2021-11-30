@@ -27,8 +27,8 @@ operator fun Project.get(property: String): String {
 }
 
 configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_16
-    targetCompatibility = JavaVersion.VERSION_16
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 version = project["mod_version"]
@@ -38,7 +38,7 @@ val environment: Map<String, String> = System.getenv()
 val releaseName = "${name.split("-").joinToString(" ") { it.capitalize() }} ${(version as String).split("+")[0]}"
 val releaseType = (version as String).split("+")[0].split("-").let { if(it.isNotEmpty()) if(it[1] == "BETA" || it[1] == "ALPHA") it[1] else "ALPHA" else "RELEASE" }
 val releaseFile = "${buildDir}/libs/${base.archivesBaseName}-${version}.jar"
-val cfGameVersion = (version as String).split("+")[1].let{ if(it == project["minecraft_version"]) it else "$it-Snapshot"}
+val cfGameVersion = (version as String).split("+")[1].let{ if(!it.contains("-") && project["minecraft_version"].startsWith(it)) project["minecraft_version"] else "$it-Snapshot"}
 
 fun getChangeLog(): String {
     return "A changelog can be found at https://github.com/lucaargolo/$name/commits/"
@@ -57,8 +57,8 @@ fun getBranch(): String {
     return branch.substring(branch.lastIndexOf("/") + 1)
 }
 
-minecraft {
-    accessWidener("src/main/resources/slotlock.accesswidener")
+loom {
+    accessWidenerPath.set(file("src/main/resources/slotlock.accesswidener"))
 }
 
 repositories {
