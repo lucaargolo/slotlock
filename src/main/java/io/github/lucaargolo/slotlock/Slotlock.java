@@ -157,7 +157,7 @@ public class Slotlock implements ClientModInitializer {
 
     }
 
-    public static void handleMouseClick(ScreenHandler handler, PlayerInventory playerInventory, Slot slot, int invSlot, int clickData, SlotActionType actionType, CallbackInfo info) {
+    public static void handleMouseClick(ScreenHandler handler, PlayerInventory playerInventory, Slot slot, Slot deleteItemSlot, int invSlot, int clickData, SlotActionType actionType, CallbackInfo info) {
         if(!MinecraftClient.getInstance().isOnThread()) return;
         if(slot != null && slot.inventory == playerInventory && Slotlock.isLocked(((SlotAccessor) slot).getIndex())) {
             info.cancel();
@@ -174,6 +174,16 @@ public class Slotlock implements ClientModInitializer {
         }
 
         if(actionType == SlotActionType.QUICK_MOVE && invSlot >= 0 && invSlot < handler.slots.size()) {
+            if (slot != null && slot == deleteItemSlot) {
+                for (int i = 0; i < playerInventory.size(); ++i) {
+                    if (!Slotlock.isLocked(i)) {
+                        playerInventory.removeStack(i);
+                    }
+                }
+                info.cancel();
+                return;
+            }
+
             Slot slot2 = handler.slots.get(invSlot);
             if(slot2.inventory == playerInventory && Slotlock.isLocked(((SlotAccessor) slot2).getIndex())) {
                 info.cancel();
