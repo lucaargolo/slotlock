@@ -196,7 +196,7 @@ public class Slotlock implements ClientModInitializer {
 
     public static void handleKeyPressed(Slot focusedSlot, PlayerInventory playerInventory, int keyCode, int scanCode, CallbackInfoReturnable<Boolean> info) {
         if(!MinecraftClient.getInstance().isOnThread()) return;
-        if(keyCode != 256 && !MinecraftClient.getInstance().options.keyInventory.matchesKey(keyCode, scanCode)) {
+        if(keyCode != 256 && !MinecraftClient.getInstance().options.inventoryKey.matchesKey(keyCode, scanCode)) {
             Slot finalSlot = focusedSlot;
             if(finalSlot instanceof CreativeInventoryScreen.CreativeSlot) {
                 finalSlot = ((CreativeSlotAccessor) finalSlot).getSlot();
@@ -243,7 +243,7 @@ public class Slotlock implements ClientModInitializer {
     public static void handleInputEvents(GameOptions options, ClientPlayerEntity player) {
         if(!MinecraftClient.getInstance().isOnThread()) return;
         boolean toPress = false;
-        while(options.keySwapHands.wasPressed()) {
+        while(options.swapHandsKey.wasPressed()) {
             if (!player.isSpectator()) {
                 int selectedSlot = player.getInventory().selectedSlot;
                 if(!Slotlock.isLocked(selectedSlot)) {
@@ -251,7 +251,7 @@ public class Slotlock implements ClientModInitializer {
                 }
             }
         }
-        if(toPress) KeyBinding.onKeyPressed(((KeyBindingAccessor) options.keySwapHands).getBoundKey());
+        if(toPress) KeyBinding.onKeyPressed(((KeyBindingAccessor) options.swapHandsKey).getBoundKey());
     }
 
     private static boolean canMergeItems(ItemStack first, ItemStack second) {

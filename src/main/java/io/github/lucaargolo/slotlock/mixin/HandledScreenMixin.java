@@ -13,7 +13,6 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -74,8 +73,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             if(finalSlot != null && Slotlock.isLocked(((SlotAccessor) finalSlot).getIndex())) {
                 ItemStack stack = finalSlot.hasStack() ? this.focusedSlot.getStack() : ItemStack.EMPTY;
                 List<Text> tooltip = this.getTooltipFromItem(stack);
-                tooltip.add(new TranslatableText("slotlock.locked"));
-                tooltip.add(new TranslatableText("slotlock.press1").append(new TranslatableText(Slotlock.lockBinding.getBoundKeyTranslationKey()).copy().append(new TranslatableText("slotlock.press2"))));
+                tooltip.add(Text.translatable("slotlock.locked"));
+                tooltip.add(Text.translatable("slotlock.press1").append(Text.translatable(Slotlock.lockBinding.getBoundKeyTranslationKey()).copy().append(Text.translatable("slotlock.press2"))));
                 this.renderTooltip(matrices, tooltip, x, y);
                 info.cancel();
             }
