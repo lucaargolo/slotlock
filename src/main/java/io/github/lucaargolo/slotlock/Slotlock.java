@@ -271,6 +271,12 @@ public class Slotlock implements ClientModInitializer {
         if(toPress) KeyBinding.onKeyPressed(((KeyBindingAccessor) options.swapHandsKey).getBoundKey());
     }
 
+    public static void handleItemPick(int selectedSlot, CallbackInfo info) {
+        if(Slotlock.isLocked(selectedSlot)) {
+            info.cancel();
+        }
+    }
+
     private static boolean canMergeItems(ItemStack first, ItemStack second) {
         if (first.getItem() != second.getItem()) {
             return false;
