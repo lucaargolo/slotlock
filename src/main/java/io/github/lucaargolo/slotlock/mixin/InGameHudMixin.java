@@ -38,6 +38,9 @@ public class InGameHudMixin extends DrawableHelper {
             }
         }
         slotIndex++;
+        if(slotIndex == 9) {
+            slotIndex = 40;
+        }
     }
 
 }
