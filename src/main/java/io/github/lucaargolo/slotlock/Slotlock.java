@@ -263,7 +263,7 @@ public class Slotlock implements ClientModInitializer {
         while(options.swapHandsKey.wasPressed()) {
             if (!player.isSpectator()) {
                 int selectedSlot = player.getInventory().selectedSlot;
-                if(!Slotlock.isLocked(selectedSlot)) {
+                if(!Slotlock.isLocked(selectedSlot) && !Slotlock.isLocked(40)) {
                     toPress = true;
                 }
             }
