@@ -159,8 +159,15 @@ public class Slotlock implements ClientModInitializer {
 
     public static void handleMouseClick(ScreenHandler handler, PlayerInventory playerInventory, Slot slot, Slot deleteItemSlot, int invSlot, int clickData, SlotActionType actionType, CallbackInfo info) {
         if(!MinecraftClient.getInstance().isOnThread()) return;
-        if(slot != null && slot.inventory == playerInventory && Slotlock.isLocked(((SlotAccessor) slot).getIndex())) {
-            info.cancel();
+        if(slot != null && slot.inventory == playerInventory) {
+            Slot finalSlot = slot;
+            if(finalSlot instanceof CreativeInventoryScreen.CreativeSlot) {
+                finalSlot = ((CreativeSlotAccessor) finalSlot).getSlot();
+            }
+            int index = ((SlotAccessor) finalSlot).getIndex();
+            if(Slotlock.isLocked(index)) {
+                info.cancel();
+            }
         }
 
         if(slot != null && actionType == SlotActionType.PICKUP_ALL) {
