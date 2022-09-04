@@ -75,7 +75,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
                 ItemStack stack = finalSlot.hasStack() ? this.focusedSlot.getStack() : ItemStack.EMPTY;
                 List<Text> tooltip = this.getTooltipFromItem(stack);
                 tooltip.add(new TranslatableText("slotlock.locked"));
-                tooltip.add(new TranslatableText("slotlock.press1").append(new TranslatableText(Slotlock.lockBinding.getBoundKeyTranslationKey()).copy().append(new TranslatableText("slotlock.press2"))));
+                tooltip.add(new TranslatableText("slotlock.press1").append(Slotlock.lockBinding.getBoundKeyLocalizedText().copy().append(new TranslatableText("slotlock.press2"))));
                 this.renderTooltip(matrices, tooltip, x, y);
                 info.cancel();
             }
