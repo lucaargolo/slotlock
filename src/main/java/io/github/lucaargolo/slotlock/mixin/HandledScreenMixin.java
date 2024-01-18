@@ -3,10 +3,11 @@ package io.github.lucaargolo.slotlock.mixin;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.lucaargolo.slotlock.Slotlock;
 import io.github.lucaargolo.slotlock.mixed.HandledScreenMixed;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
@@ -64,7 +65,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     }
 
     @Inject(at = @At("HEAD"), method = "drawMouseoverTooltip", cancellable = true)
-    public void drawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
+    public void drawMouseoverTooltip(DrawContext context, int x, int y, CallbackInfo info) {
         if (handler.getCursorStack().isEmpty() && this.focusedSlot != null && this.focusedSlot.inventory == this.slotlock$playerInventory) {
             Slot finalSlot = focusedSlot;
             if(finalSlot instanceof CreativeInventoryScreen.CreativeSlot) {
@@ -72,17 +73,17 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             }
             if(finalSlot != null && Slotlock.isLocked(((SlotAccessor) finalSlot).getIndex())) {
                 ItemStack stack = finalSlot.hasStack() ? this.focusedSlot.getStack() : ItemStack.EMPTY;
-                List<Text> tooltip = this.getTooltipFromItem(stack);
+                List<Text> tooltip = getTooltipFromItem(MinecraftClient.getInstance(), stack);
                 tooltip.add(Text.translatable("slotlock.locked"));
                 tooltip.add(Text.translatable("slotlock.press1").append(Slotlock.lockBinding.getBoundKeyLocalizedText().copy().append(Text.translatable("slotlock.press2"))));
-                this.renderTooltip(matrices, tooltip, x, y);
+                context.drawTooltip(this.textRenderer, tooltip, x, y);
                 info.cancel();
             }
         }
     }
 
     @Inject(at = @At("HEAD"), method = "drawSlot")
-    public void drawSlot(MatrixStack matrices, Slot slot, CallbackInfo info) {
+    public void drawSlot(DrawContext context, Slot slot, CallbackInfo ci) {
         Slot finalSlot = slot;
         if(finalSlot instanceof CreativeInventoryScreen.CreativeSlot) {
             finalSlot = ((CreativeSlotAccessor) finalSlot).getSlot();
@@ -93,7 +94,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
                 return;
             }
             RenderSystem.setShaderTexture(0, SLOT_LOCK_TEXTURE);
-            this.drawTexture(matrices, slot.x, slot.y, 0, 0, 16, 16);
+            context.drawTexture(SLOT_LOCK_TEXTURE, slot.x, slot.y, 0, 0, 16, 16);
         }
     }
 
