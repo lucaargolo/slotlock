@@ -285,7 +285,7 @@ public class Slotlock implements ClientModInitializer {
         } else if (first.getCount() > first.getMaxCount()) {
             return false;
         } else {
-            return ItemStack.areNbtEqual(first, second);
+            return ItemStack.areItemsEqual(first, second);
         }
     }
 
